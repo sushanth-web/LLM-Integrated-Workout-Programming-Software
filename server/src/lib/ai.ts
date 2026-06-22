@@ -18,41 +18,89 @@ export async function generateTrainingPlan(
     preferred_split: profile.preferred_split || "upper_lower",
   };
 
-  const apiKey = process.env.OPEN_ROUTER_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    throw new Error("OPEN_ROUTER_KEY is not set in environment variables");
+    throw new Error("GEMINI_API_KEY is not set in environment variables");
   }
 
+  // Google's Gemini API exposes an OpenAI-compatible endpoint, so we can keep
+  // using the OpenAI SDK and just point it at Gemini.
   const openai = new OpenAI({
     apiKey,
-    baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: {
-      "HTTP-Referer": process.env.BASE_URL || "http://localhost:3001",
-      "X-Title": "GymAI Plan Generator",
-    },
+    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    maxRetries: 4,
   });
 
   // Build the prompt
   const prompt = buildPrompt(normalizedProfile);
 
+  const messages = [
+    {
+      role: "system" as const,
+      content:
+        "You are an expert fitness trainer and program designer. You must respond with valid JSON only. Do not include any markdown, reasoning, or additional text.",
+    },
+    {
+      role: "user" as const,
+      content: prompt,
+    },
+  ];
+
+  // Gemini models intermittently return 503 (overloaded) or 429 (rate limit).
+  // Retry transient failures with backoff, and fall back across models so a
+  // single busy model doesn't fail the whole request.
+  const MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.0-flash"];
+  const TRANSIENT_STATUS = new Set([408, 409, 429, 500, 502, 503, 504]);
+
+  async function createCompletionWithFallback() {
+    let lastError: unknown;
+    for (const model of MODELS) {
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          return await openai.chat.completions.create({
+            model,
+            messages,
+            temperature: 0.7,
+            response_format: { type: "json_object" },
+          });
+        } catch (error: any) {
+          lastError = error;
+          if (TRANSIENT_STATUS.has(error?.status) && attempt < 3) {
+            const delay = 800 * attempt; // 800ms, 1600ms
+            console.warn(
+              `[AI] ${model} returned ${error?.status} (attempt ${attempt}/3) — retrying in ${delay}ms`,
+            );
+            await new Promise((r) => setTimeout(r, delay));
+            continue;
+          }
+          console.warn(
+            `[AI] ${model} failed (${error?.status ?? error?.message}) — trying next model`,
+          );
+          break; // move on to the next model
+        }
+      }
+    }
+    throw lastError;
+  }
+
   try {
-    const completion = await openai.chat.completions.create({
-      model: "nvidia/llama-nemotron-embed-vl-1b-v2:free",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an expert fitness trainer and program designer. You must respond with valid JSON only. Do not include any markdown, reasoning, or additional text.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      response_format: { type: "json_object" },
-    });
+    const completion = await createCompletionWithFallback();
+
+    // The provider can return an error payload (no `choices`) for invalid
+    // models, rate limits, auth issues, etc. Surface that instead of crashing.
+    if (!completion.choices || completion.choices.length === 0) {
+      console.error(
+        "[AI] Provider returned no choices:",
+        JSON.stringify(completion, null, 2),
+      );
+      const apiError = (completion as any)?.error?.message;
+      throw new Error(
+        apiError
+          ? `AI provider error: ${apiError}`
+          : "AI provider returned no choices",
+      );
+    }
 
     const content = completion.choices[0].message.content;
 
