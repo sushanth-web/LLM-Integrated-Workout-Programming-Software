@@ -10,7 +10,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://llm-integrated-workout-programming-nine.vercel.app",
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow non-browser clients (curl, server-to-server) with no Origin header.
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 app.use(express.json());
 
