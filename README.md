@@ -32,7 +32,6 @@ GymAI is a full-stack **PERN-style** application (PostgreSQL · Express · React
 
 ![Landing page](docs/screenshots/landing.png)
 
-> _Onboarding and generated-plan screenshots coming soon — drop `onboarding.png` and `plan.png` into `docs/screenshots/` to add them here._
 
 ---
 
