@@ -4,6 +4,9 @@
 
 **Generate personalized, science-based workout programs tailored to your goals, experience, equipment, and schedule — powered by Google Gemini.**
 
+### 🔗 [**Live Demo →**](https://llmintegratedgymapp.vercel.com)
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-brightgreen?logo=vercel&logoColor=white)](https://llmintegratedgymapp.vercel.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
