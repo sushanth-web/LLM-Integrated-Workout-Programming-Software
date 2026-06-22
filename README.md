@@ -4,9 +4,9 @@
 
 **Generate personalized, science-based workout programs tailored to your goals, experience, equipment, and schedule — powered by Google Gemini.**
 
-### 🔗 [**Live Demo →**](https://llmintegratedgymapp.vercel.com)
+### 🔗 [**Live Demo →**](https://llm-integrated-workout-programming-nine.vercel.app)
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-brightgreen?logo=vercel&logoColor=white)](https://llmintegratedgymapp.vercel.com)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-brightgreen?logo=vercel&logoColor=white)](https://llm-integrated-workout-programming-nine.vercel.app)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
@@ -28,11 +28,11 @@ GymAI is a full-stack **PERN-style** application (PostgreSQL · Express · React
 
 ## 📸 Screenshots
 
-> Add your images to `docs/screenshots/` and they'll render here.
+### Landing
 
-| Landing | Onboarding | Generated Plan |
-|:---:|:---:|:---:|
-| ![Landing page](docs/screenshots/landing.png) | ![Onboarding form](docs/screenshots/onboarding.png) | ![Training plan](docs/screenshots/plan.png) |
+![Landing page](docs/screenshots/landing.png)
+
+> _Onboarding and generated-plan screenshots coming soon — drop `onboarding.png` and `plan.png` into `docs/screenshots/` to add them here._
 
 ---
 
